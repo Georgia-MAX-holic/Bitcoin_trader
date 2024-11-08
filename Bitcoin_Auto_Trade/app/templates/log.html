@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <div id="logs">
+        <!-- 실시간 로그가 추가될 곳 -->
+    </div>
+
+    <script>
+        // 웹소켓 연결
+        const logsDiv = document.getElementById("logs");
+        const socket = new WebSocket("ws://localhost:8000/ws/log");
+
+        socket.onmessage = function(event) {
+            // 새로운 로그가 오면 div에 추가
+            const newLog = document.createElement("p");
+            newLog.textContent = event.data;
+            logsDiv.appendChild(newLog);
+            logsDiv.scrollTop = logsDiv.scrollHeight;  // 스크롤을 항상 맨 아래로
+        };
+
+        socket.onclose = function(event) {
+            console.log("WebSocket closed");
+        };
+    </script>
+</body>
+</html>
