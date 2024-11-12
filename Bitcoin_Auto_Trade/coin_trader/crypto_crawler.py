@@ -1,4 +1,3 @@
-
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
@@ -41,8 +40,7 @@ class CryptoNewsCrawler:
         
         # 검색 키워드
         searches = {
-#            'Bitcoin': ['비트코인', 'bitcoin', 'btc', 'BTC'],
-            'DOGE': ['도지코인', 'DOGE', 'doge', '도지']
+            'Bitcoin': ['비트코인', 'bitcoin', 'btc', 'BTC']
         }
         
         try:
@@ -104,7 +102,7 @@ class CryptoNewsCrawler:
         최신 뉴스 조회
         
         Args:
-            crypto_type (str): 'DOGE' 또는 'Bitcoin' (None이면 모두 조회)
+            crypto_type (str): 'Bitcoin' 또는 'DOGE' (None이면 모두 조회)
             limit (int): 조회할 뉴스 개수
         """
         with sqlite3.connect(self.db_path) as conn:
@@ -139,13 +137,6 @@ def main():
     # 최신 뉴스 확인
     print("\n=== Bitcoin 최신 뉴스 ===")
     for news in crawler.get_latest_news('Bitcoin', 5):
-        print(f"제목: {news[1]}")
-        print(f"링크: {news[2]}")
-        print(f"작성일: {news[3]}")
-        print("-" * 80)
-    
-    print("\n=== DOGE 최신 뉴스 ===")
-    for news in crawler.get_latest_news('DOGE', 5):
         print(f"제목: {news[1]}")
         print(f"링크: {news[2]}")
         print(f"작성일: {news[3]}")
