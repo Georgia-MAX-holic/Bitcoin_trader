@@ -63,7 +63,8 @@ def get_latest_btc_news():
     return [{"title": item[0], "date": item[1]} for item in news]
 
 def ai_trading():
-    
+    base64_image = chart_capture_main()
+    crypto_crawler.main()
     # Upbit 객체 생성
     access = os.getenv("UPBIT_ACCESS_KEY")
     secret = os.getenv("UPBIT_SECRET_KEY")
@@ -158,12 +159,10 @@ chart image: {base64_image}"""
     elif result["decision"] == "hold":
         print("### Hold Position ###")
 
-# 매시 정각에 자동 트레이딩 실행
-# schedule.every().hour.at(":00").do(ai_trading)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-crypto_crawler.main()
-base64_image = chart_capture_main()
-ai_trading()
+
+schedule.every().hour.at(":00").do(ai_trading)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
