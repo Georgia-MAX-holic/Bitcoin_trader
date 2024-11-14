@@ -48,13 +48,13 @@ def get_fear_and_greed_index():
         print(f"Failed to fetch Fear and Greed Index. Status code: {response.status_code}")
         return None
 
-def get_latest_btc_news():
+def get_latest_eth_news():
     # SQLite 데이터베이스 연결
     conn = sqlite3.connect('Crypto_news.db')
     cursor = conn.cursor()
     
     # 최신 published_date 기준으로 5개의 뉴스 추출
-    cursor.execute("SELECT title, published_date FROM crypto_news WHERE crypto_type = 'BTC' ORDER BY published_date DESC LIMIT 5")
+    cursor.execute("SELECT title, published_date FROM crypto_news WHERE crypto_type = 'ETH' ORDER BY published_date DESC LIMIT 5")
     news = cursor.fetchall()
     
     # 연결 종료
@@ -72,17 +72,17 @@ def ai_trading():
 
     # 1. 현재 투자 상태 조회
     all_balances = upbit.get_balances()
-    filtered_balances = [balance for balance in all_balances if balance['currency'] in ['BTC', 'KRW']]
+    filtered_balances = [balance for balance in all_balances if balance['currency'] in ['ETH', 'KRW']]
     
     # 2. 오더북(호가 데이터) 조회
-    orderbook = pyupbit.get_orderbook("KRW-BTC")
+    orderbook = pyupbit.get_orderbook("KRW-ETH")
     
     # 3. 1시간 차트와 4시간 차트 데이터 조회 및 보조지표 추가
-    df_hourly = pyupbit.get_ohlcv("KRW-BTC", interval="minute60", count=48)  # 최근 48시간 데이터
+    df_hourly = pyupbit.get_ohlcv("KRW-ETH", interval="minute60", count=48)  # 최근 48시간 데이터
     df_hourly = dropna(df_hourly)
     df_hourly = add_indicators(df_hourly)
     
-    df_4hour = pyupbit.get_ohlcv("KRW-BTC", interval="minute240", count=30)  # 최근 30개의 4시간 봉 데이터
+    df_4hour = pyupbit.get_ohlcv("KRW-ETH", interval="minute240", count=30)  # 최근 30개의 4시간 봉 데이터
     df_4hour = dropna(df_4hour)
     df_4hour = add_indicators(df_4hour)
 
@@ -90,9 +90,9 @@ def ai_trading():
     fear_greed_index = get_fear_and_greed_index()
 
     # 5. 최신 뉴스 헤드라인 가져오기
-    news_headlines = get_latest_btc_news()
+    news_headlines = get_latest_eth_news()
 
-    my_BTC = upbit.get_balance("BTC")
+    my_ETH = upbit.get_balance("ETH")
     
     # AI에게 데이터 제공하고 판단 받기
     client = OpenAI(api_key=os.getenv("OPEN_API_KEY"))
@@ -102,10 +102,10 @@ def ai_trading():
     messages=[
         {
         "role": "system",
-        "content": """You are an expert in BTC investing. Analyze the provided data including technical indicators, market data, and the Fear and Greed Index. Tell me whether to buy, sell, or hold at the moment. Consider the following in your analysis:
+        "content": """You are an expert in ETH investing. Analyze the provided data including technical indicators, market data, and the Fear and Greed Index. Tell me whether to buy, sell, or hold at the moment. Consider the following in your analysis:
         - Technical indicators and market data from both 1-hour and 4-hour charts
         - The Fear and Greed Index and its implications
-        - Recent news headlines and their potential impact on BTC price
+        - Recent news headlines and their potential impact on ETH price
         - Overall market sentiment
         - Image of current 1-hourly candle chart for pattern analysis
 
@@ -125,7 +125,7 @@ Hourly OHLCV with indicators (48 hours): {df_hourly.to_json()}
 4-Hour OHLCV with indicators (30 periods): {df_4hour.to_json()}
 Fear and Greed Index: {json.dumps(fear_greed_index)}
 Recent news headlines: {json.dumps(news_headlines)}
-my wallet status: {my_BTC}
+my wallet status: {my_ETH}
 chart image: {base64_image}"""
         }
     ],
@@ -146,16 +146,16 @@ chart image: {base64_image}"""
         my_krw = upbit.get_balance("KRW")
         if my_krw * 0.9995 > 5000:
             print("### Buy Order Executed ###")
-            print(upbit.buy_market_order("KRW-BTC", my_krw * 0.9995))
+            print(upbit.buy_market_order("KRW-ETH", my_krw * 0.9995))
         else:
             print("### Buy Order Failed: Insufficient KRW (less than 5000 KRW) ###")
     elif result["decision"] == "sell":
-        current_price = pyupbit.get_orderbook(ticker="KRW-BTC")['orderbook_units'][0]["ask_price"]
-        if my_BTC * current_price > 5000:
+        current_price = pyupbit.get_orderbook(ticker="KRW-ETH")['orderbook_units'][0]["ask_price"]
+        if my_ETH * current_price > 5000:
             print("### Sell Order Executed ###")
-            print(upbit.sell_market_order("KRW-BTC", my_BTC))
+            print(upbit.sell_market_order("KRW-ETH", my_ETH))
         else:
-            print("### Sell Order Failed: Insufficient BTC (less than 5000 KRW worth) ###")
+            print("### Sell Order Failed: Insufficient ETH (less than 5000 KRW worth) ###")
     elif result["decision"] == "hold":
         print("### Hold Position ###")
 

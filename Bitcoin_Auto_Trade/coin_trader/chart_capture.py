@@ -58,7 +58,7 @@ class UpbitChartCapture:
     def capture_upbit_chart(self):
         try:
             # 업비트 페이지 로드
-            self.driver.get('https://upbit.com/exchange?code=CRIX.UPBIT.KRW-BTC')
+            self.driver.get('https://upbit.com/exchange?code=CRIX.UPBIT.KRW-ETH')
             time.sleep(4)  # 페이지 로딩 시간 확보
 
             # 차트 옵션 메뉴 클릭
